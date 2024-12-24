@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .form-radio:checked {
+            @apply text-green-500;
+        }
+        .form-radio:checked + span {
+            @apply font-bold text-green-500;
+        }
+    </style>
+</head>
+<body class="bg-white flex flex-col items-center justify-center min-h-screen">
+    <div class="bg-gray-800 w-full py-4">
+        <h1 class="text-white text-center text-3xl font-bold">MODEL CONVERTER</h1>
+    </div>
+    <div class="flex flex-col items-center mt-8">
+        <div class="bg-teal-600 text-white text-2xl font-bold py-16 px-32 rounded-lg border-4 border-brown-500 mb-8">
+            UPLOAD FILE
+        </div>
+        <div class="text-brown-500 text-6xl mb-8">
+            &#8595;
+        </div>
+        <input type="file" id="fileInput" class="mb-4" />
+        <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4">
+            <h2 class="text-gray-800 text-xl font-bold mb-4">Select File Format</h2>
+            <div class="flex flex-col space-y-2">
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="fileFormat" value="FBX">
+                    <span class="ml-2">FBX</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="fileFormat" value="OBJ">
+                    <span class="ml-2">OBJ</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="fileFormat" value="DAE">
+                    <span class="ml-2">DAE</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="fileFormat" value="DEA">
+                    <span class="ml-2">DEA</span>
+                </label>
+            </div>
+        </div>
+        <button id="convertButton" class="bg-blue-500 text-white text-xl font-bold py-2 px-4 rounded-lg hover:bg-blue-700 mt-4">
+            Convert File
+        </button>
+        <div id="result" class="mt-4 text-gray-800"></div>
+    </div>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            const selectedFormat = document.querySelector('input[name="fileFormat"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (!fileInput.files.length) {
+                resultDiv.textContent = "Please upload a file to convert.";
+                return;
+            }
+
+            if (!selectedFormat) {
+                resultDiv.textContent = "Please select a target file format.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('format', selectedFormat.value);
+
+            fetch('https://your-backend-api-endpoint/convert', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        resultDiv.innerHTML = `
+                            Conversion successful! 
+                            <a href="${data.downloadUrl}" class="text-blue-500 underline" target="_blank">
+                                Download Converted File
+                            </a>
+                        `;
+                    } else {
+                        resultDiv.textContent = "Conversion failed. Please try again.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    resultDiv.textContent = "An error occurred. Please try again.";
+                });
+        });
+    </script>
+</body>
+</html>
